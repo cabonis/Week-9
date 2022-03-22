@@ -12,6 +12,7 @@ let data=[
 let root = null;
 let map = {};
 
+// One pass over the data to setup parent/child relationships, assumes data is sorted
 data.forEach((d) => {
     let node = {name:d.childColumn, children:[], value:d.val};
     map[node.name] = node;
@@ -21,9 +22,10 @@ data.forEach((d) => {
     else{
         map[d.parentColumn].children.push(node);
     }
-})
+});
 
-function calculatevalues(node){
+// Recursively calculate all node values
+(function calculatevalues(node){
     if(!node.value){
         node.value = 0
         node.children.forEach((c) => {
@@ -31,88 +33,73 @@ function calculatevalues(node){
         });
     }
     return node.value;
-}(root);
+})(root);
 
-let treeData = [root];
 
+// Setup eCharts
 let dom = document.getElementById("container");
 let treeMap = echarts.init(dom);
 
-    function getLevelOption() {
-    return  [{
-        itemStyle: {
-            borderColor: '#555',
-            borderWidth: 0,
-            gapWidth: 10
+// Push data to TreeMap
+treeMap.setOption({
+    title: {
+    text: 'My Treemap',
+    left: 'center'
+    },
+    series: [{
+        name: 'My Treemap',
+        type: 'treemap',
+        label: {
+            show: true,
+            formatter: '{b}: {c}',
+            fontSize: 16
         },
         upperLabel: {
-            show: false
-        }
-    }, {
-        itemStyle: {
-            borderColor: '#52AB80',
-            borderWidth: 15,
-            gapWidth: 15
-        },
-        emphasis: {
-            itemStyle: {
-                borderColor: '#ccc'
-            }
-        }
-    }, {
-        itemStyle: {
-            borderColor: '#e8aa63',
-            borderWidth: 15,
-            gapWidth: 15
-        },
-        emphasis: {
-            itemStyle: {
-                borderColor: '#ccc'
-            }
-        }
-    }, {
-        itemStyle: {
-            borderColor: '#F0F4F3',
-            borderWidth: 5,
-            gapWidth: 1
-        },
-        emphasis: {
-            itemStyle: {
-                borderColor: '#ccc'
-            }
-        }
-    }, {
-        colorSaturation: [0.3, 0.55],
-        itemStyle: {
-            borderWidth: 5,
-            gapWidth: 1,
-            borderColorSaturation: 0.7
-        }
-    }];
-    }
-
-
-    treeMap.setOption(
-    (option = {
-        title: {
-        text: 'My Treemap',
-        left: 'center'
-        },
-        series: [
-        {
-            name: 'My Treemap',
-            type: 'treemap',
-            label: {
             show: true,
-            formatter: '{b}'
+            height: 40,
+            formatter: '{b}: {c}',
+            fontSize: 16
+        },
+        levels: [{
+            itemStyle: {
+                borderWidth: 0
             },
             upperLabel: {
-            show: true,
-            height: 30
+                show: false
+            }
+        }, {
+            itemStyle: {
+                borderColor: 'green',
+                borderWidth: 15,
+                gapWidth: 15
             },
-            levels: getLevelOption(),
-            data: treeData
-        }
-        ]
-    })
-    );
+            emphasis: {
+                itemStyle: {
+                    borderColor: '#ccc'
+                }
+            }
+        }, {
+            itemStyle: {
+                borderColor: 'red',
+                borderWidth: 15,
+                gapWidth: 15
+            },
+            emphasis: {
+                itemStyle: {
+                    borderColor: '#ccc'
+                }
+            }
+        }, {
+            itemStyle: {
+                color: "blue",
+                borderWidth: 0
+            },
+            emphasis: {
+                itemStyle: {
+                    color: '#ccc'
+                }
+            }
+        }],
+        data: [root]
+    }]
+});
